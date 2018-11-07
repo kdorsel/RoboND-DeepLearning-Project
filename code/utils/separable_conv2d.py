@@ -15,15 +15,15 @@
 
 # modified by Devin Anzelmo 2017
 
-from tensorflow.contrib.keras.python.keras import activations
-from tensorflow.contrib.keras.python.keras import backend as K
-from tensorflow.contrib.keras.python.keras import constraints
-from tensorflow.contrib.keras.python.keras import initializers
-from tensorflow.contrib.keras.python.keras import regularizers
-from tensorflow.contrib.keras.python.keras.engine import InputSpec
-from tensorflow.contrib.keras.python.keras.engine import Layer
-from tensorflow.contrib.keras.python.keras.utils.generic_utils import get_custom_objects 
-from tensorflow.contrib.keras.python.keras.utils import conv_utils
+from keras import activations
+from keras import backend as K
+from keras import constraints
+from keras import initializers
+from keras import regularizers
+from keras.engine import InputSpec
+from keras.engine import Layer
+from keras.utils.generic_utils import get_custom_objects
+from keras.utils import conv_utils
 
 from tensorflow.python.layers import base
 from tensorflow.python.layers import utils
@@ -285,18 +285,21 @@ class SeparableConv2DTfLayers(tf_convolutional_layers.Conv2D):
     self.pointwise_regularizer = pointwise_regularizer
 
   def build(self, input_shape):
-    if len(input_shape) < 4:
+    print(input_shape)
+    print(type(input_shape))
+    print(len(input_shape))
+    if len(input_shape.dims) < 4:
       raise ValueError('Inputs to `SeparableConv2D` should have rank 4. '
-                       'Received input shape:', str(input_shape))
+                       'Received input shape:', str(input_shape.dims))
     if self.data_format == 'channels_first':
       channel_axis = 1
     else:
       channel_axis = 3
-    if input_shape[channel_axis] is None:
+    if input_shape.dims[channel_axis] is None:
       raise ValueError('The channel dimension of the inputs to '
                        '`SeparableConv2D` '
                        'should be defined. Found `None`.')
-    input_dim = int(input_shape[channel_axis])
+    input_dim = int(input_shape.dims[channel_axis])
     self.input_spec = base.InputSpec(ndim=4, axes={channel_axis: input_dim})
     depthwise_kernel_shape = (self.kernel_size[0],
                               self.kernel_size[1],
@@ -610,7 +613,7 @@ class BilinearUpSampling2D(Layer):
 
   def __init__(self, size=(2, 2), data_format=None, **kwargs):
     super(BilinearUpSampling2D, self).__init__(**kwargs)
-    self.data_format = conv_utils.normalize_data_format(data_format)
+    self.data_format = K.normalize_data_format(data_format)
     self.size = conv_utils.normalize_tuple(size, 2, 'size')
     self.input_spec = InputSpec(ndim=4)
 

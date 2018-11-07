@@ -32,8 +32,8 @@ from glob import glob
 from scipy import misc
 
 import numpy as np
-from tensorflow.contrib.keras.python.keras.preprocessing.image import Iterator
-from tensorflow.contrib.keras.python.keras import backend as K
+from keras.preprocessing.image import Iterator
+from keras import backend as K
 
 
 def preprocess_input(x):
@@ -122,13 +122,15 @@ class BatchIteratorSimple(Iterator):
               self.index_generator)
         # The transformation of images is not under thread lock
         # so it can be done in parallel
-        
-        batch_x = np.zeros((current_batch_size,) + self.image_shape, dtype=K.floatx())
+        return self._get_batches_of_transformed_samples(index_array)
+
+    def _get_batches_of_transformed_samples(self, index_array):
+        batch_x = np.zeros((len(index_array),) + self.image_shape, dtype=K.floatx())
 
 
         if self.training:
             batch_y = np.zeros(
-                    (current_batch_size,) + self.image_shape[:2] + (self.num_classes,),
+                    (len(index_array),) + self.image_shape[:2] + (self.num_classes,),
                     dtype=K.floatx())
 
         for e, i in enumerate(index_array):
@@ -145,7 +147,7 @@ class BatchIteratorSimple(Iterator):
                 continue
 
             else:
-                gt_image = misc.imread(file_tuple[1]).clip(0,1) 
+                gt_image = misc.imread(file_tuple[1]).clip(0,1)
                 if gt_image.shape[0] != self.image_shape[0]:
                     gt_image = misc.imresize(gt_image, self.image_shape)
 
